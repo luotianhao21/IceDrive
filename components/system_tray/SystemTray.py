@@ -1,4 +1,5 @@
 import typing
+from libs import Signal
 from static.fonts import IceDriveFont
 from .components import IconDeviceInfo, ModeButton
 from .widgets import IDLabel
@@ -24,6 +25,10 @@ from siui.components import (
 )
 
 class SystemTray:
+
+    normal_mode: Signal = Signal() # 切换普通模式
+    rage_mode: Signal = Signal() # 切换狂暴模式
+
     def __init__(self, app):
         self.app = app
 
@@ -31,18 +36,54 @@ class SystemTray:
         self.tray_icon: QSystemTrayIcon = QSystemTrayIcon(self.app)
         self.tray_icon.setIcon(QIcon("./static/images/Snow.png"))
         self.tray_icon.setToolTip("IceDrive")
+        self.tray_icon.activated.connect(self.on_tray_clicked)
 
         self.tray_menu = IceDriveTrayMenu(self, app)
+        self.tray_menu.normal_mode_btn.btn.clicked.connect(
+            lambda _: (self.setMode("normal"), self.normal_mode.emit())
+        )
+        self.tray_menu.rage_mode_btn.btn.clicked.connect(
+            lambda _: (self.setMode("rage"), self.rage_mode.emit())
+        )
         # 设置菜单为空，使用自定义的窗口
         self.tray_icon.setContextMenu(self.tray_menu)
 
         # 显示托盘
         self.tray_icon.show()
 
+    def setCPUTemperature(self, temp: float | int):
+        """设置CPU温度显示"""
+        self.tray_menu.cpu_info.setTemperatureInfo(temp)
+        self.tray_menu.cpu_info.setToolTip(f"CPU 温度\n{temp}°C")
+
+    def setGPUTemperature(self, temp: float | int):
+        """设置GPU温度显示"""
+        self.tray_menu.gpu_info.setTemperatureInfo(temp)
+        self.tray_menu.gpu_info.setToolTip(f"GPU 温度\n{temp}°C")
+
+    def setFanRPM(self, rpm: int):
+        """设置风扇转速显示"""
+        self.tray_menu.fan_info.setRPMInfo(rpm)
+        self.tray_menu.fan_info.setToolTip(f"风扇转速\n{rpm} RPM")
+
+    def setPumpRPM(self, rpm: int):
+        """设置水泵转速显示"""
+        self.tray_menu.pump_info.setRPMInfo(rpm)
+        self.tray_menu.pump_info.setToolTip(f"水泵转速\n{rpm} RPM")
+
+    def setMode(self, mode: str):
+        """设置当前模式显示"""
+        if mode == "normal":
+            self.tray_menu.normal_mode_btn.setActive(True)
+            self.tray_menu.rage_mode_btn.setActive(False)
+        elif mode == "rage":
+            self.tray_menu.normal_mode_btn.setActive(False)
+            self.tray_menu.rage_mode_btn.setActive(True)
+
     def on_tray_clicked(self, reason):
         """被点击事件处理"""
-        if reason == QSystemTrayIcon.Trigger:
-            self.app.activateWindow()
+        if reason == QSystemTrayIcon.DoubleClick:
+            self.app.showWindow()
 
     def quit_app(self):
         """退出程序"""
@@ -184,7 +225,9 @@ class IceDriveTrayMenu(QMenu):
 
         self.home_btn = ModeButton(self.widget, active_mode=False)
         self.home_btn.loadSvgData(SiGlobal.siui.iconpack.get("icedrive_ic_home"))
+        self.home_btn.btn.clicked.connect(lambda _: (self.app.showWindow(), self.hideMenu()))
         self.exit_btn = ModeButton(self.widget, active_mode=False)
+        self.exit_btn.btn.clicked.connect(lambda _: self.hideMenu())
         self.exit_btn.loadSvgData(SiGlobal.siui.iconpack.get("icedrive_ic_exit"))
 
         self.button_container_2.addWidget(self.home_btn)
@@ -266,6 +309,14 @@ class IceDriveTrayMenu(QMenu):
         self.pump_info.tooltip.hide()
 
         return super().mouseReleaseEvent(event)
+
+    def hideMenu(self):
+        """隐藏菜单"""
+        self.hide()
+        self.cpu_info.tooltip.hide()
+        self.gpu_info.tooltip.hide()
+        self.fan_info.tooltip.hide()
+        self.pump_info.tooltip.hide()
 
     def showEvent(self, event):
         # 当菜单显示时，调整位置

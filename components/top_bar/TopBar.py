@@ -140,5 +140,5 @@ class TopBar:
         self.toggleMaximized(*args, **kwargs)
 
     def _event_btn_close(self, *args, **kwargs):
-        # 关闭窗口
-        self.app.close()
+        # 将窗口最小化到系统托盘
+        self.app.hide()

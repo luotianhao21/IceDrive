@@ -40,3 +40,18 @@ class IceDriveApp(SiliconApplication):
 
         # 开启设备信息更新线程
         self.device_info.start()
+
+    def showWindow(self):
+        """用于调用显示主窗口"""
+        self.show()
+        # 置于顶层
+        self.raise_()
+        self.activateWindow()
+
+    def exitConfirm(self):
+        """退出确认"""
+        self.show()
+        self.raise_()
+        self.activateWindow()
+
+        # 弹出确认对话框
