@@ -1,6 +1,6 @@
 import typing
 from static.fonts import IceDriveFont
-from .components import IconDeviceInfo
+from .components import IconDeviceInfo, ModeButton
 from .widgets import IDLabel
 
 from PyQt5.QtWidgets import (
@@ -64,19 +64,23 @@ class IceDriveTrayMenu(QMenu):
 
         self.widget = QWidget()
         self.widget.setStyleSheet("""
-            background-color: rgba(37, 34, 42, 0.95);
-            border-radius: 8px;
-            border: 3px solid rgba(30, 31, 34, 0.3);
+            background-color: rgba(37, 34, 42, 0.99);
+            border-radius: 12px;
+            border: 2px solid rgba(30, 31, 34, 0.3);
+            padding: 0;
+            margin: 0;
         """)
-        self.widget.setMinimumSize(250, 340)
+        self.setContentsMargins(0, 0, 0, 0)
+        self.widget.setMinimumSize(250, 420)
 
         self.layout = QVBoxLayout(self.widget)
         self.layout.setContentsMargins(0, 0, 0, 0)
+        self.layout.setSpacing(0)
         self.layout.setAlignment(Qt.AlignmentFlag.AlignTop | Qt.AlignmentFlag.AlignHCenter)
 
         # 添加控件
         # 1. LOGO标签
-        self.addPlaceholder(4)
+        self.addPlaceholder(18)
         self.logo_container = SiDenseHContainer(self.widget) # 容器
         self.logo_container.setSpacing(4)
         self.logo_container.setAlignment(Qt.AlignmentFlag.AlignCenter) # 设置内容为全部居中
@@ -91,16 +95,19 @@ class IceDriveTrayMenu(QMenu):
         self.logo_label.setAlignment(Qt.AlignmentFlag.AlignVCenter | Qt.AlignmentFlag.AlignLeft)
         self.logo_label.adjustSize()
 
+        self.logo_container.addPlaceholder(2)
         self.logo_container.addWidget(self.logo)
         self.logo_container.addWidget(self.logo_label)
         self.logo_container.adjustSize()
 
         self.addWidget(self.logo_container)
 
+        self.addPlaceholder(12)
         self.addHSeparatorLine(2)
 
         # 2. CPU温度、GPU温度、风扇转速、水泵转速
         self.info_container = SiDenseVContainer(self.widget)
+        self.info_container.setSpacing(4)
         # 第一部分
         self.info_container_1 = SiDenseHContainer(self.info_container)
         self.info_container_1.setAlignment(Qt.AlignCenter)
@@ -109,10 +116,12 @@ class IceDriveTrayMenu(QMenu):
         self.cpu_info = IconDeviceInfo(self.widget)
         self.cpu_info.loadSvgData(SiGlobal.siui.iconpack.get("icedrive_ic_cpu"))
         self.cpu_info.setTemperatureInfo(0)
+        self.cpu_info.setToolTip("CPU 温度\n0°C")
 
         self.gpu_info = IconDeviceInfo(self.widget)
         self.gpu_info.loadSvgData(SiGlobal.siui.iconpack.get("icedrive_ic_gpu"))
         self.gpu_info.setTemperatureInfo(0)
+        self.gpu_info.setToolTip("GPU 温度\n0°C")
 
         self.info_container_1.addWidget(self.cpu_info)
         self.info_container_1.addWidget(self.gpu_info, "right")
@@ -124,23 +133,63 @@ class IceDriveTrayMenu(QMenu):
 
         self.fan_info = IconDeviceInfo(self.widget)
         self.fan_info.loadSvgData(SiGlobal.siui.iconpack.get("icedrive_ic_fan"))
-        self.fan_info.setRPMInfo(4000)
+        self.fan_info.setRPMInfo(0)
+        self.fan_info.setToolTip("风扇转速\n0 RPM")
 
         self.pump_info = IconDeviceInfo(self.widget)
         self.pump_info.loadSvgData(SiGlobal.siui.iconpack.get("icedrive_ic_pump"))
-        self.pump_info.setRPMInfo(12000)
+        self.pump_info.setRPMInfo(0)
+        self.pump_info.setToolTip("水泵转速\n0 RPM")
 
         self.info_container_2.addWidget(self.fan_info)
         self.info_container_2.addWidget(self.pump_info, "right")
 
-        self.info_container.addPlaceholder(6)
+        self.info_container.addPlaceholder(16)
         self.info_container.addWidget(self.info_container_1)
         self.info_container.addPlaceholder(8)
         self.info_container.addWidget(self.info_container_2)
+        self.info_container.addPlaceholder(8)
 
         self.addWidget(self.info_container)
 
         self.addHSeparatorLine(2)
+
+        self.button_container_1 = SiDenseHContainer(self.widget)
+        self.button_container_1.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        self.button_container_1.setSpacing(8)
+        self.button_container_1.setFixedStyleSheet("""
+            margin: 0;
+            padding: 0;
+        """)
+
+        self.normal_mode_btn = ModeButton(self.widget, active_mode=True)
+        self.normal_mode_btn.loadSvgData(SiGlobal.siui.iconpack.get("icedrive_ic_normal_mode"))
+        self.normal_mode_btn.setActive(True)
+        self.rage_mode_btn = ModeButton(self.widget, active_mode=True)
+        self.rage_mode_btn.loadSvgData(SiGlobal.siui.iconpack.get("icedrive_ic_rage_mode"))
+
+        self.addPlaceholder(16)
+        self.button_container_1.addWidget(self.normal_mode_btn)
+        self.button_container_1.addWidget(self.rage_mode_btn)
+        self.addWidget(self.button_container_1)
+        self.addPlaceholder(8)
+
+        self.button_container_2 = SiDenseHContainer(self.widget)
+        self.button_container_2.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        self.button_container_2.setSpacing(8)
+        self.button_container_2.setFixedStyleSheet("""
+            margin: 0;
+            padding: 0;
+        """)
+
+        self.home_btn = ModeButton(self.widget, active_mode=False)
+        self.home_btn.loadSvgData(SiGlobal.siui.iconpack.get("icedrive_ic_home"))
+        self.exit_btn = ModeButton(self.widget, active_mode=False)
+        self.exit_btn.loadSvgData(SiGlobal.siui.iconpack.get("icedrive_ic_exit"))
+
+        self.button_container_2.addWidget(self.home_btn)
+        self.button_container_2.addWidget(self.exit_btn)
+        self.addWidget(self.button_container_2)
 
         # ===================== 菜单主体 =====================
         self.action = QWidgetAction(self)
@@ -173,10 +222,17 @@ class IceDriveTrayMenu(QMenu):
 
         self.addWidget(line)
 
-    def addPlaceholder(self, width: int):
+    def addPlaceholder(self, height: int):
         """添加占位符"""
         placeholder = QWidget()
-        placeholder.setFixedWidth(width)
+        placeholder.setStyleSheet("""
+            background-color: transparent;
+            border: none;
+            margin: 0;
+            padding: 0;
+        """)
+        placeholder.setAttribute(Qt.WidgetAttribute.WA_TranslucentBackground)
+        placeholder.setFixedHeight(height)
         self.layout.addWidget(placeholder)
 
     def addWidget(self, widget: QWidget):
@@ -190,6 +246,11 @@ class IceDriveTrayMenu(QMenu):
             event.accept()
             return None
 
+        self.cpu_info.tooltip.hide()
+        self.gpu_info.tooltip.hide()
+        self.fan_info.tooltip.hide()
+        self.pump_info.tooltip.hide()
+
         return super().mousePressEvent(event)
 
     def mouseReleaseEvent(self, event):
@@ -198,6 +259,11 @@ class IceDriveTrayMenu(QMenu):
             # 检测是否是在菜单内点击，如果是则拦截
             event.accept()
             return None
+
+        self.cpu_info.tooltip.hide()
+        self.gpu_info.tooltip.hide()
+        self.fan_info.tooltip.hide()
+        self.pump_info.tooltip.hide()
 
         return super().mouseReleaseEvent(event)
 

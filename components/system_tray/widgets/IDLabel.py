@@ -7,6 +7,8 @@ class IDLabel(QLabel):
     def __init__(self, parent=None):
         super().__init__(parent)
 
+        self.parent = parent
+
         self.setStyleSheet("""
             padding: 0;
             margin: 0;
@@ -42,6 +44,7 @@ class IDLabel(QLabel):
 
         self.setPixmap(pixmap)
         self.setFixedSize(size)
+        self.parent.adjustSize()
 
     def loadImage(self, image_path: str, size: QSize | tuple[int, int] = QSize(32, 32)):
         """将位图图像加载到QLabel中"""
@@ -53,3 +56,4 @@ class IDLabel(QLabel):
             pixmap = pixmap.scaled(size, Qt.KeepAspectRatio, Qt.SmoothTransformation)
             self.setPixmap(pixmap)
             self.setFixedSize(size)
+        self.parent.adjustSize()
