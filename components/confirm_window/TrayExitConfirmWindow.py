@@ -215,26 +215,6 @@ class TrayExitConfirmWindow(QDialog):
         self.label_image.stopGif()
         super().close()
 
-    def headerAddWidget(self, widget: QWidget, side="left", index=10000):
-        """
-        给Header添加一个控件
-        :param widget: 控件
-        :param side: 添加侧
-        :param index: 插入位置
-        :return:
-        """
-        self._header_container.addWidget(widget, side, index)
-
-    def bodyAddWidget(self, widget: QWidget, side="top", index=10000):
-        """
-        给Body添加一个控件
-        :param widget: 控件
-        :param side: 添加侧
-        :param index: 插入位置
-        :return:
-        """
-        self._body_container.addWidget(widget, side, index)
-
     def closeConfirmWindow(self):
         self.confirm.cancel.emit()
         self.close()
