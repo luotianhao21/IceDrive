@@ -41,7 +41,7 @@ class DeviceInfoTooltip(QWidget):
         # 文字标签
         self.label = QLabel(text)
         self.label.setAlignment(Qt.AlignCenter) # 文字居中
-        self.label.setFont(IceDriveFont.Others.AaJianHaoTi(16))
+        self.label.setFont(IceDriveFont.vivoSansSimplifiedChinese.Bold(14))
         self.label.setStyleSheet("color: #ffffff;") # 白色文字
         layout.addWidget(self.label)
         self.adjustSize()
@@ -111,7 +111,7 @@ class IconDeviceInfo(SiDenseVContainer):
 
         # 文字
         self.label = IDLabel(self)
-        self.label.setFont(IceDriveFont.vivoSansGlobal.Heavy(15))
+        self.label.setFont(IceDriveFont.vivoSansSimplifiedChinese.Heavy(15))
         self.label.setFixedStyleSheet("color: rgba(255, 255, 255, 0.9);")
         self.label.setAlignment(Qt.AlignmentFlag.AlignCenter)  # 文字居中
 

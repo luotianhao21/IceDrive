@@ -4,7 +4,7 @@ from PyQt5.QtSvg import QSvgRenderer
 from PyQt5.QtWidgets import QPushButton
 
 
-class ICPushButton(QPushButton):
+class IDPushButton(QPushButton):
     def __init__(self, parent=None):
         super().__init__(parent)
 
