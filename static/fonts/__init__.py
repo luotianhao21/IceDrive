@@ -37,31 +37,89 @@ def get_font(font_file_name, font_size, font_weight) -> SiFont:
 
 class IceDriveFont:
     # 本Font调用的多为vivoSans字体
-    class vivoSans:
-        # 变成函数，使用的时候再调用，不要自动执行
+
+    class Others:
+        @staticmethod
+        def YouSheBiaoTiHei(font_size: int = GlobalFontSize.S):
+            return get_font("Others/YouSheBiaoTiHei.ttf", font_size, GlobalFontWeight.NORMAL)
+
+        @staticmethod
+        def AaJianHaoTi(font_size: int = GlobalFontSize.S):
+            return get_font("Others/AaJianHaoTi.ttf", font_size, GlobalFontWeight.NORMAL)
+
+    class vivoSansSimplifiedChinese:
+        @staticmethod
+        def Thin(font_size: int = GlobalFontSize.S):
+            return get_font("vivoSans/vivoSansSimplifiedChinese/vivoSans-Thin.ttf", font_size, GlobalFontWeight.LIGHT)
+
+        @staticmethod
+        def ExtraLight(font_size: int = GlobalFontSize.S):
+            return get_font("vivoSans/vivoSansSimplifiedChinese/vivoSans-Extralight.ttf", font_size, GlobalFontWeight.LIGHT)
+
         @staticmethod
         def Light(font_size: int = GlobalFontSize.S):
-            return get_font("vivoSans/vivoSansGlobal-Light.ttf", font_size, GlobalFontWeight.LIGHT)
+            return get_font("vivoSans/vivoSansSimplifiedChinese/vivoSans-Light.ttf", font_size, GlobalFontWeight.LIGHT)
+
+        @staticmethod
+        def Medium(font_size: int = GlobalFontSize.S):
+            return get_font("vivoSans/vivoSansSimplifiedChinese/vivoSans-Medium.ttf", font_size, GlobalFontWeight.MEDIUM)
 
         @staticmethod
         def Regular(font_size: int = GlobalFontSize.S):
-            return get_font("vivoSans/vivoSansGlobal-Regular.ttf", font_size, GlobalFontWeight.NORMAL)
+            return get_font("vivoSans/vivoSansSimplifiedChinese/vivoSans-Regular.ttf", font_size, GlobalFontWeight.NORMAL)
 
         @staticmethod
         def Heavy(font_size: int = GlobalFontSize.S):
-            return get_font("vivoSans/vivoSansGlobal-Heavy.ttf", font_size, GlobalFontWeight.BOLD)
+            return get_font("vivoSans/vivoSansSimplifiedChinese/vivoSans-Heavy.ttf", font_size, GlobalFontWeight.BOLD)
 
         @staticmethod
         def Bold(font_size: int = GlobalFontSize.S):
-            return get_font("vivoSans/vivoSansGlobal-Bold.ttf", font_size, GlobalFontWeight.BOLD)
+            return get_font("vivoSans/vivoSansSimplifiedChinese/vivoSans-Bold.ttf", font_size, GlobalFontWeight.BOLD)
 
         @staticmethod
         def ExtraBold(font_size: int = GlobalFontSize.S):
-            return get_font("vivoSans/vivoSansGlobal-Extrabold.ttf", font_size, GlobalFontWeight.BOLD)
+            return get_font("vivoSans/vivoSansSimplifiedChinese/vivoSans-Extrabold.ttf", font_size, GlobalFontWeight.BOLD)
 
         @staticmethod
         def DemiBold(font_size: int = GlobalFontSize.S):
-            return get_font("vivoSans/vivoSansGlobal-Demibold.ttf", font_size, GlobalFontWeight.DEMI_BOLD)
+            return get_font("vivoSans/vivoSansSimplifiedChinese/vivoSans-Demibold.ttf", font_size, GlobalFontWeight.DEMI_BOLD)
+
+    class vivoSansGlobal:
+        @staticmethod
+        def Thin(font_size: int = GlobalFontSize.S):
+            return get_font("vivoSans/vivoSansGlobal/vivoSansGlobal-Thin.ttf", font_size, GlobalFontWeight.LIGHT)
+
+        @staticmethod
+        def ExtraLight(font_size: int = GlobalFontSize.S):
+            return get_font("vivoSans/vivoSansGlobal/vivoSansGlobal-Extralight.ttf", font_size, GlobalFontWeight.LIGHT)
+
+        @staticmethod
+        def Light(font_size: int = GlobalFontSize.S):
+            return get_font("vivoSans/vivoSansGlobal/vivoSansGlobal-Light.ttf", font_size, GlobalFontWeight.LIGHT)
+
+        @staticmethod
+        def Medium(font_size: int = GlobalFontSize.S):
+            return get_font("vivoSans/vivoSansGlobal/vivoSansGlobal-Medium.ttf", font_size, GlobalFontWeight.MEDIUM)
+
+        @staticmethod
+        def Regular(font_size: int = GlobalFontSize.S):
+            return get_font("vivoSans/vivoSansGlobal/vivoSansGlobal-Regular.ttf", font_size, GlobalFontWeight.NORMAL)
+
+        @staticmethod
+        def Heavy(font_size: int = GlobalFontSize.S):
+            return get_font("vivoSans/vivoSansGlobal/vivoSansGlobal-Heavy.ttf", font_size, GlobalFontWeight.BOLD)
+
+        @staticmethod
+        def Bold(font_size: int = GlobalFontSize.S):
+            return get_font("vivoSans/vivoSansGlobal/vivoSansGlobal-Bold.ttf", font_size, GlobalFontWeight.BOLD)
+
+        @staticmethod
+        def ExtraBold(font_size: int = GlobalFontSize.S):
+            return get_font("vivoSans/vivoSansGlobal/vivoSansGlobal-Extrabold.ttf", font_size, GlobalFontWeight.BOLD)
+
+        @staticmethod
+        def DemiBold(font_size: int = GlobalFontSize.S):
+            return get_font("vivoSans/vivoSansGlobal/vivoSansGlobal-Demibold.ttf", font_size, GlobalFontWeight.DEMI_BOLD)
 
     class Others:
         @staticmethod

@@ -3,6 +3,7 @@ from libs import Signal
 from static.fonts import IceDriveFont
 from .components import IconDeviceInfo, ModeButton
 from .widgets import IDLabel
+from ..confirm_window import TrayExitConfirmWindow
 
 from PyQt5.QtWidgets import (
     QWidget,
@@ -112,7 +113,7 @@ class IceDriveTrayMenu(QMenu):
             margin: 0;
         """)
         self.setContentsMargins(0, 0, 0, 0)
-        self.widget.setMinimumSize(250, 420)
+        self.widget.setMinimumSize(250, 440)
 
         self.layout = QVBoxLayout(self.widget)
         self.layout.setContentsMargins(0, 0, 0, 0)
@@ -227,7 +228,7 @@ class IceDriveTrayMenu(QMenu):
         self.home_btn.loadSvgData(SiGlobal.siui.iconpack.get("icedrive_ic_home"))
         self.home_btn.btn.clicked.connect(lambda _: (self.app.showWindow(), self.hideMenu()))
         self.exit_btn = ModeButton(self.widget, active_mode=False)
-        self.exit_btn.btn.clicked.connect(lambda _: self.hideMenu())
+        self.exit_btn.btn.clicked.connect(lambda _: (self.hideMenu(), TrayExitConfirmWindow(self.app).exec_()))
         self.exit_btn.loadSvgData(SiGlobal.siui.iconpack.get("icedrive_ic_exit"))
 
         self.button_container_2.addWidget(self.home_btn)

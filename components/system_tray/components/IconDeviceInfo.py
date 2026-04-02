@@ -111,7 +111,7 @@ class IconDeviceInfo(SiDenseVContainer):
 
         # 文字
         self.label = IDLabel(self)
-        self.label.setFont(IceDriveFont.vivoSans.Heavy(15))
+        self.label.setFont(IceDriveFont.vivoSansGlobal.Heavy(15))
         self.label.setFixedStyleSheet("color: rgba(255, 255, 255, 0.9);")
         self.label.setAlignment(Qt.AlignmentFlag.AlignCenter)  # 文字居中
 

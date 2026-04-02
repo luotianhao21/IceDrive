@@ -1,4 +1,4 @@
-from PyQt5.QtGui import QPixmap, QPainter, QIcon
+from PyQt5.QtGui import QPixmap, QPainter, QIcon, QColor
 from PyQt5.QtSvg import QSvgRenderer
 
 from ..widgets import IDLabel
@@ -23,12 +23,12 @@ class ModeButton(SiDenseVContainer):
         self.hover_color = "#48434D"
 
         self.setContentsMargins(0, 0, 0, 0)
-        self.setFixedSize(100, 70)
+        self.setFixedSize(100, 80)
         self.setSpacing(0)
         self.setAlignment(Qt.AlignmentFlag.AlignCenter)
 
         self.btn = QPushButton(parent)
-        self.btn.setFixedSize(100, 60)
+        self.btn.setFixedSize(100, 70)
         self.btn.setIconSize(QSize(30, 30))
         self.btn.setStyleSheet(f"""
             QPushButton {{
@@ -88,15 +88,28 @@ class ModeButton(SiDenseVContainer):
                 }}
             """)
 
-    def loadSvgData(self, svg_data: str, size: QSize | tuple[int, int] = (30, 30)):
-        """加载 SVG 数据并设置图标大小"""
+    def loadSvgData(self, svg_data: str, size: QSize | tuple[int, int] = (30, 30), color: str = None):
+        """加载 SVG 数据并设置图标大小 + 支持染色"""
         if isinstance(size, tuple):
             size = QSize(*size)
 
-        renderer = QSvgRenderer(svg_data)
+        # 创建透明 pixmap
         pixmap = QPixmap(size)
         pixmap.fill(Qt.transparent)
+
+        # 渲染 SVG
         painter = QPainter(pixmap)
+        painter.setRenderHint(QPainter.Antialiasing)  # 抗锯齿
+        renderer = QSvgRenderer(svg_data)
         renderer.render(painter)
+
+        # 染色逻辑
+        if color is not None:
+            painter.setCompositionMode(painter.CompositionMode_SourceIn)
+            painter.fillRect(pixmap.rect(), QColor(color))
+
         painter.end()
+
+        # 设置图标
         self.btn.setIcon(QIcon(pixmap))
+        self.btn.setIconSize(size)
