@@ -13,11 +13,8 @@ from siui.components.widgets import (
     SiSimpleButton,
 )
 
-
 class TopBar:
     def __init__(self, app: SiliconApplication):
-        super().__init__() # 调用父类构造函数
-
         # 保存应用实例和主层引用
         self.app = app
         self.layer_main = self.app.layerMain()
@@ -31,7 +28,7 @@ class TopBar:
         self.btn_close_color = "#EC88AE"
         self.top_bar_btn_size = 64
 
-        # 设置窗口TopBar
+        # 设置窗口 TopBar
         self.layer_main.app_title.setText("IceDrive")
         self.layer_main.app_title.setMinimumWidth(300) # 设置最小宽度
         self.layer_main.app_title.setFont(IceDriveFont.Others.YouSheBiaoTiHei(34)) # 设置字体
@@ -42,7 +39,7 @@ class TopBar:
         # 再删除icon到title的占位
         self.layer_main.container_title.removeWidget(self.layer_main.container_title.widgets_left[1])
 
-        self.layer_main.app_icon.load("./static/images/Snow.png") # 加载图标
+        self.layer_main.app_icon.load("static/images/Snow.png") # 加载图标
 
         self.layer_main.container_title.addPlaceholder(10, side="left", index=0)
         self.layer_main.container_title.addPlaceholder(8, side="left", index=2)

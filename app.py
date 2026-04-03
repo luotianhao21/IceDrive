@@ -1,7 +1,8 @@
 # app.py
 from static import icons
 from static.fonts import IceDriveFont
-from components import TopBar, SystemTray
+from components import TopBar
+from components import SystemTray
 from libs import DeviceInfo, BLE, Commands
 
 from PyQt5.QtCore import QTimer, Qt

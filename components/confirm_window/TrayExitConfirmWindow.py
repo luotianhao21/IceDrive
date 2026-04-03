@@ -7,7 +7,7 @@ from libs import Signal
 from static.fonts import IceDriveFont
 
 from PyQt5.QtCore import Qt, QPoint, QSize
-from PyQt5.QtWidgets import QDialog, QVBoxLayout, QWidget, QPushButton, QLabel
+from PyQt5.QtWidgets import QDialog, QVBoxLayout, QWidget
 
 from siui.components import SiDenseVContainer, SiDenseHContainer, SiLabel
 
@@ -18,12 +18,12 @@ class TrayExitConfirmWindow(QDialog):
         exit = Signal() # 确认退出
         cancel = Signal() # 取消
 
-    def __init__(self, parent: SiliconApplication | None = None):
+    def __init__(self, parent: SiliconApplication = SiliconApplication()):
         super().__init__(parent)
 
         self._width = 360
         self._height = 250
-        self.app = parent
+        self.app: SiliconApplication = parent
 
         self.setWindowTitle("确认退出IceDrive")
         self.setFixedSize(self._width, self._height)

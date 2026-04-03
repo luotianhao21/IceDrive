@@ -152,7 +152,7 @@ class IceDriveTrayMenu(QMenu):
         self.info_container.setSpacing(4)
         # 第一部分
         self.info_container_1 = SiDenseHContainer(self.info_container)
-        self.info_container_1.setAlignment(Qt.AlignCenter)
+        self.info_container_1.setAlignment(Qt.AlignmentFlag.AlignCenter)
         self.info_container_1.setSpacing(12)
 
         self.cpu_info = IconDeviceInfo(self.widget)
@@ -170,7 +170,7 @@ class IceDriveTrayMenu(QMenu):
 
         # 第二部分
         self.info_container_2 = SiDenseHContainer(self.info_container)
-        self.info_container_2.setAlignment(Qt.AlignCenter)
+        self.info_container_2.setAlignment(Qt.AlignmentFlag.AlignCenter)
         self.info_container_2.setSpacing(12)
 
         self.fan_info = IconDeviceInfo(self.widget)

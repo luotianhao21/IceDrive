@@ -2,10 +2,13 @@
 import sys
 from PyQt5.QtWidgets import QApplication
 
+# 先创建 QApplication，避免后续导入时出现 Qt 错误
+app = QApplication(sys.argv)
+
 import siui
 from siui.core import SiGlobal, SiColor
 from static import icons
-from app import IceDriveApp  # 从独立文件导入IceDriveApp
+from app import IceDriveApp  # 从独立文件导入 IceDriveApp
 
 # 仅在主进程执行一次图标注册（避免循环引用重复执行）
 if __name__ == "__main__":
@@ -19,9 +22,7 @@ if __name__ == "__main__":
     SiGlobal.siui.iconpack.append_class(baqian_custom_icons.icons_class)
     for key, data in baqian_custom_icons.icons.items():
         SiGlobal.siui.iconpack.append(key, data, baqian_custom_icons.icons_class)
-
     # 启动应用
-    app = QApplication(sys.argv)
     ice_drive_window = IceDriveApp()
     ice_drive_window.show()
     sys.exit(app.exec_())
