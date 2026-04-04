@@ -349,6 +349,9 @@ class DeviceInfo:
         else:
             log("DeviceInfo", f"无效的更新间隔: {interval}，请提供一个正整数")
 
+    def GetDeviceInfo(self) -> DeviceInfoData:
+        return self.device_info
+
     def GetCPUUsage(self):
         return self.device_info.cpu_usage
 

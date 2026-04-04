@@ -3,7 +3,6 @@ from libs import Signal
 from static.fonts import IceDriveFont
 from .components import IconDeviceInfo, ModeButton
 from .widgets import IDLabel
-from ..confirm_window import TrayExitConfirmWindow
 
 from PyQt5.QtWidgets import (
     QWidget,
@@ -83,8 +82,11 @@ class SystemTray:
 
     def on_tray_clicked(self, reason):
         """被点击事件处理"""
-        if reason == QSystemTrayIcon.DoubleClick:
-            self.app.showWindow()
+        if reason == QSystemTrayIcon.ActivationReason.DoubleClick:
+            if self.app.isActiveWindowFocused():
+                self.app.showMinimized()
+            else:
+                self.app.showWindow()
 
     def quit_app(self):
         """退出程序"""
@@ -100,7 +102,15 @@ class IceDriveTrayMenu(QMenu):
         self.tray = tray
         self._is_showing = False
 
-        self.setWindowFlags(self.windowFlags() | Qt.WindowType.FramelessWindowHint | Qt.WindowType.NoDropShadowWindowHint | Qt.WindowType.Popup)
+        menu_flags: Qt.WindowType = self.windowFlags()
+        # 设置无边框
+        self.setWindowFlags(
+            menu_flags |
+            Qt.WindowType.FramelessWindowHint |
+            Qt.WindowType.NoDropShadowWindowHint |
+            Qt.WindowType.Popup
+        )
+        # 设置背景透明
         self.setAttribute(Qt.WidgetAttribute.WA_TranslucentBackground)
         self.setStyleSheet("background-color: transparent; border: none;")
 
@@ -115,6 +125,7 @@ class IceDriveTrayMenu(QMenu):
         self.setContentsMargins(0, 0, 0, 0)
         self.widget.setMinimumSize(250, 440)
 
+        # 根布局
         self.layout = QVBoxLayout(self.widget)
         self.layout.setContentsMargins(0, 0, 0, 0)
         self.layout.setSpacing(0)
@@ -155,11 +166,13 @@ class IceDriveTrayMenu(QMenu):
         self.info_container_1.setAlignment(Qt.AlignmentFlag.AlignCenter)
         self.info_container_1.setSpacing(12)
 
+        # CPU温度
         self.cpu_info = IconDeviceInfo(self.widget)
         self.cpu_info.loadSvgData(SiGlobal.siui.iconpack.get("icedrive_ic_cpu"))
         self.cpu_info.setTemperatureInfo(0)
         self.cpu_info.setToolTip("CPU 温度\n0°C")
 
+        # GPU温度
         self.gpu_info = IconDeviceInfo(self.widget)
         self.gpu_info.loadSvgData(SiGlobal.siui.iconpack.get("icedrive_ic_gpu"))
         self.gpu_info.setTemperatureInfo(0)
@@ -173,11 +186,13 @@ class IceDriveTrayMenu(QMenu):
         self.info_container_2.setAlignment(Qt.AlignmentFlag.AlignCenter)
         self.info_container_2.setSpacing(12)
 
+        # 风扇转速
         self.fan_info = IconDeviceInfo(self.widget)
         self.fan_info.loadSvgData(SiGlobal.siui.iconpack.get("icedrive_ic_fan"))
         self.fan_info.setRPMInfo(0)
         self.fan_info.setToolTip("风扇转速\n0 RPM")
 
+        # 水泵转速
         self.pump_info = IconDeviceInfo(self.widget)
         self.pump_info.loadSvgData(SiGlobal.siui.iconpack.get("icedrive_ic_pump"))
         self.pump_info.setRPMInfo(0)
@@ -193,9 +208,9 @@ class IceDriveTrayMenu(QMenu):
         self.info_container.addPlaceholder(8)
 
         self.addWidget(self.info_container)
-
         self.addHSeparatorLine(2)
 
+        # 3. 模式切换按钮、主页显示、退出应用按钮
         self.button_container_1 = SiDenseHContainer(self.widget)
         self.button_container_1.setAlignment(Qt.AlignmentFlag.AlignCenter)
         self.button_container_1.setSpacing(8)
@@ -204,12 +219,15 @@ class IceDriveTrayMenu(QMenu):
             padding: 0;
         """)
 
+        # 模式切换按钮
+        # 均衡模式
         self.normal_mode_btn = ModeButton(self.widget, active_mode=True)
         self.normal_mode_btn.loadSvgData(SiGlobal.siui.iconpack.get("icedrive_ic_normal_mode"))
         self.normal_mode_btn.setActive(True)
         self.rage_mode_btn = ModeButton(self.widget, active_mode=True)
         self.rage_mode_btn.loadSvgData(SiGlobal.siui.iconpack.get("icedrive_ic_rage_mode"))
 
+        # 狂暴模式
         self.addPlaceholder(16)
         self.button_container_1.addWidget(self.normal_mode_btn)
         self.button_container_1.addWidget(self.rage_mode_btn)
@@ -224,11 +242,14 @@ class IceDriveTrayMenu(QMenu):
             padding: 0;
         """)
 
+        # 主页按钮
         self.home_btn = ModeButton(self.widget, active_mode=False)
         self.home_btn.loadSvgData(SiGlobal.siui.iconpack.get("icedrive_ic_home"))
         self.home_btn.btn.clicked.connect(lambda _: (self.app.showWindow(), self.hideMenu()))
+
+        # 退出按钮
         self.exit_btn = ModeButton(self.widget, active_mode=False)
-        self.exit_btn.btn.clicked.connect(lambda _: (self.hideMenu(), TrayExitConfirmWindow(self.app).exec_()))
+        self.exit_btn.btn.clicked.connect(lambda _: self._on_exit_clicked())
         self.exit_btn.loadSvgData(SiGlobal.siui.iconpack.get("icedrive_ic_exit"))
 
         self.button_container_2.addWidget(self.home_btn)
@@ -318,6 +339,12 @@ class IceDriveTrayMenu(QMenu):
         self.gpu_info.tooltip.hide()
         self.fan_info.tooltip.hide()
         self.pump_info.tooltip.hide()
+
+    def _on_exit_clicked(self):
+        """处理退出按钮点击事件"""
+        from ..confirm_window.TrayExitConfirmWindow import TrayExitConfirmWindow
+        self.hideMenu()
+        TrayExitConfirmWindow(self.app).exec_()
 
     def showEvent(self, event):
         # 当菜单显示时，调整位置

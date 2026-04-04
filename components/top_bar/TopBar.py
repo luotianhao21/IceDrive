@@ -1,4 +1,8 @@
 import typing
+from ..confirm_window import MainWindowExitConfirmWindow
+
+from PyQt5.QtGui import QScreen
+
 from static.fonts import IceDriveFont
 
 from PyQt5 import QtGui
@@ -93,20 +97,23 @@ class TopBar:
             self.app.showMaximized()
             self.btn_max.attachment().load(SiGlobal.siui.iconpack.get("ic_fluent_arrow_minimize_filled", self.btn_max_color))
 
-    def mousePressEvent(self, event: typing.Optional[QtGui.QMouseEvent]):
+    def mousePressEvent(self, event):
         # 鼠标左键按下时记录鼠标位置
         if event.button() == Qt.MouseButton.LeftButton:
             self.drag_start_position = event.globalPos() - self.app.frameGeometry().topLeft()
             event.accept()
 
-    def mouseMoveEvent(self, event: typing.Optional[QtGui.QMouseEvent]):
+    def mouseMoveEvent(self, event):
         # 鼠标左键按下后移动窗口
         if event.buttons() == Qt.MouseButton.LeftButton:
             if self.app.isMaximized():
                 # 当窗口最大化时，鼠标移动窗口后缩小窗口
                 # 记录鼠标位置
                 position = event.globalPos() - self.app.frameGeometry().topLeft()
-                max_size = self.app.screen().size()
+                screen: QScreen | None = self.app.screen()
+                if screen is None:
+                    return
+                max_size = screen.size()
                 self.app.showNormal()  # 还原窗口
                 # 按照比例计算常规窗口的位置
                 normal_window_position = QPoint(
@@ -138,4 +145,4 @@ class TopBar:
 
     def _event_btn_close(self, *args, **kwargs):
         # 将窗口最小化到系统托盘
-        self.app.hide()
+        MainWindowExitConfirmWindow(self.app).exec_()

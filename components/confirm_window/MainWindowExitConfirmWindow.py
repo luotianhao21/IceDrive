@@ -12,11 +12,11 @@ from PyQt5.QtWidgets import QDialog, QVBoxLayout, QWidget
 from siui.components import SiDenseVContainer, SiDenseHContainer, SiLabel
 
 
-class TrayExitConfirmWindow(QDialog):
+class MainWindowExitConfirmWindow(QDialog):
 
     class confirm:
         exit = Signal() # 确认退出
-        cancel = Signal() # 取消
+        tray_app = Signal() # 取消
 
     def __init__(self, parent: SiliconApplication):
         super().__init__(parent)
@@ -174,33 +174,33 @@ class TrayExitConfirmWindow(QDialog):
         self.exit_btn.setFixedHeight(self._foot.height() - 22)
         self.exit_btn.clicked.connect(lambda _: self.closeApp())
 
-        self.cancel_btn = IDPushButton(self._foot)
-        self.cancel_btn.setStyleSheet("""
+        self.minimized_btn = IDPushButton(self._foot)
+        self.minimized_btn.setStyleSheet("""
                     IDPushButton {
                         color: #D0D0D0;
-                        background: #865F5E;
+                        background: #5E8186;
                         border: none;
                         border-radius: 8px;
                         padding: 0 10px 0 10px;
                     }
                     IDPushButton:hover {
-                        background: #5B403F;
+                        background: #445E62;
                     }
                     IDPushButton:pressed {
-                        background: #3A2928;
+                        background: #394E52;
                     }
                 """)
-        self.cancel_btn.setFont(IceDriveFont.vivoSansSimplifiedChinese.Bold(14))
-        self.cancel_btn.setText("不退了")
-        self.cancel_btn.adjustSize()
-        self.cancel_btn.setFixedWidth(int(self.width() / 2) - 15)
-        self.cancel_btn.setFixedHeight(self._foot.height() - 22)
-        self.cancel_btn.clicked.connect(lambda _: self.closeConfirmWindow())
+        self.minimized_btn.setFont(IceDriveFont.vivoSansSimplifiedChinese.Bold(14))
+        self.minimized_btn.setText("最小化到后台吧")
+        self.minimized_btn.adjustSize()
+        self.minimized_btn.setFixedWidth(int(self.width() / 2) - 15)
+        self.minimized_btn.setFixedHeight(self._foot.height() - 22)
+        self.minimized_btn.clicked.connect(lambda _: self.trayApp())
 
         self._foot_container.addPlaceholder(10, "right")
         self._foot_container.addWidget(self.exit_btn, "right")
         self._foot_container.addPlaceholder(10, "left")
-        self._foot_container.addWidget(self.cancel_btn, "left")
+        self._foot_container.addWidget(self.minimized_btn, "left")
 
         self.root_layout.addWidget(self._header)
         self.root_layout.addWidget(self._body)
@@ -210,7 +210,7 @@ class TrayExitConfirmWindow(QDialog):
         # 启动Gif动画
         self.label_image.startGif()
         super().exec_()
-        
+
     def close(self):
         self.label_image.stopGif()
         super().close()
@@ -232,12 +232,15 @@ class TrayExitConfirmWindow(QDialog):
         self.m_drag = False
 
     def closeApp(self):
+        """关闭程序"""
         self.confirm.exit.emit()
         self.close()
         self.app.close()
 
-    def closeConfirmWindow(self):
-        self.confirm.cancel.emit()
+    def trayApp(self):
+        """将窗口缩到任务栏"""
+        self.confirm.tray_app.emit()
         self.close()
+        self.app.hide()
         # 释放资源
         del self

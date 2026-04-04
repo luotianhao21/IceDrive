@@ -1,2 +1,1 @@
-class Pages:
-    pass
+from .PageHome.PageHome import PageHome
