@@ -93,9 +93,15 @@ class CPUInfoCard(IDLabel):
         self.title_icon.loadSvgData(SiGlobal.siui.iconpack.get("icedrive_ic_cpu", "#22C4DE"), QSize(28, 28))
         self.title_icon.setTextGlow(
             enable=True,
-            color=(168, 214, 225, 9),
+            color=(0, 0, 0, 0),
             blur_radius=9,
             spread=4
+        )
+        self.title_icon.setSimpleBorderGlow(
+            enable=True,
+            color=(88, 107, 111, 180),
+            blur_radius=20,
+            offset=0
         )
         self.title_icon.adjustSize()
 
@@ -110,7 +116,7 @@ class CPUInfoCard(IDLabel):
             }
         """)
         self.title_text.setTextGlow(
-            enable=True,
+            enable=False,
             color=(255, 255, 255, 6),
             blur_radius=15,
             spread=3

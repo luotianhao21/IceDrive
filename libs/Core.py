@@ -398,7 +398,7 @@ class DeviceInfo:
         self.device_info.updated.connect(self.updated)
         self.device_info.error.connect(self.error)
 
-        # 先提交一次更新
+        # 提交更新
         _loop_thread.create_task(self.device_info.Update())
 
         # 更新间隔 (s)
