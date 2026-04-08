@@ -3,9 +3,22 @@
     <words>
       <w>argtypes</w>
       <w>baqian</w>
+      <w>deinit</w>
       <w>dwmapi</w>
+      <w>pcpupkg</w>
       <w>qlineargradient</w>
       <w>qproperty</w>
+      <w>qsize</w>
+      <w>scpuuti</w>
+      <w>sfreemem</w>
+      <w>sfreevmem</w>
+      <w>sgpu</w>
+      <w>smemuti</w>
+      <w>susedmem</w>
+      <w>susedvmem</w>
+      <w>svmemusage</w>
+      <w>tcpupkg</w>
+      <w>tgpu</w>
       <w>vivo</w>
     </words>
   </dictionary>

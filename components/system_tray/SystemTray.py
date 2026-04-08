@@ -2,7 +2,7 @@ import typing
 from libs import Signal
 from static.fonts import IceDriveFont
 from .components import IconDeviceInfo, ModeButton
-from .widgets import IDLabel
+from components.widgets import IDLabel
 
 from PyQt5.QtWidgets import (
     QWidget,

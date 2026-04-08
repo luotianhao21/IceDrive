@@ -2,7 +2,7 @@ from siui.core import SiGlobal
 from siui.templates.application.application import SiliconApplication
 
 from components.confirm_window.components import IDPushButton
-from components.system_tray.widgets import IDLabel
+from components.widgets import IDLabel
 from libs import Signal
 from static.fonts import IceDriveFont
 

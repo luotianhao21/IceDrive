@@ -1,7 +1,7 @@
 from PyQt5.QtGui import QPixmap, QPainter, QIcon, QColor
 from PyQt5.QtSvg import QSvgRenderer
 
-from ..widgets import IDLabel
+from components.widgets import IDLabel
 
 from PyQt5.QtCore import Qt, QSize
 from PyQt5.QtWidgets import (

@@ -1,7 +1,7 @@
 from PyQt5.QtSvg import QSvgRenderer
-from PyQt5.QtCore import QSize, Qt, QRectF
-from PyQt5.QtWidgets import QLabel, QWidget
-from PyQt5.QtGui import QPixmap, QPainter, QMovie, QPainterPath, QLinearGradient, QColor, QPen
+from PyQt5.QtCore import QSize, Qt, QRectF, QRect
+from PyQt5.QtWidgets import QLabel, QWidget, QGraphicsDropShadowEffect
+from PyQt5.QtGui import QPixmap, QPainter, QMovie, QPainterPath, QLinearGradient, QColor, QPen, QFontMetrics
 import re
 
 
@@ -19,6 +19,19 @@ class IDLabel(QLabel):
         self.border_radius = 20
         self.border_color_start = (255, 255, 255, 60)  # RGBA: 起始颜色
         self.border_color_end = (255, 255, 255, 0)     # RGBA: 结束颜色(透明)
+
+        # 简易边框发光配置
+        self.enable_simple_border_glow = False
+        self.simple_border_glow_color = (255, 255, 255, 200)
+        self.simple_border_glow_blur_radius = 15
+        self.simple_border_glow_offset = 0
+        self.simple_border_glow_effect = None
+
+        # 文本发光配置
+        self.enable_text_glow = False
+        self.text_glow_color = (255, 255, 255, 200)
+        self.text_glow_blur_radius = 15
+        self.text_glow_spread = 3
         
         # 存储解析后的样式
         self.parsed_style = {
@@ -61,9 +74,52 @@ class IDLabel(QLabel):
             painter.end()
             return
 
+        # 如果有文本或SVG且启用了发光效果，手动绘制带发光的内容
+        if self.enable_text_glow and (self.text() or self.pixmap()):
+            if self.text():
+                self._draw_text_with_glow(painter)
+            elif self.pixmap():
+                if not self.pixmap().isNull():
+                    self._draw_pixmap_with_glow(painter)
+            painter.end()
+            return
+
         # 普通图片 / SVG 使用默认绘制
         painter.end()
         super().paintEvent(event)
+
+    def setSimpleBorderGlow(self,
+                            enable: bool = True,
+                            color: tuple = (255, 255, 255, 200),
+                            blur_radius: int = 15,
+                            offset: int = 0):
+        """
+        设置边框发光效果
+        :param enable: 是否启用发光
+        :param color: 发光颜色 RGBA (255, 255, 255, 200)
+        :param blur_radius: 模糊半径，控制发光范围
+        :param offset: 光晕偏移量，0表示均匀发光
+        """
+        self.enable_simple_border_glow = enable
+
+        if enable:
+            self.simple_border_glow_color = color
+            self.simple_border_glow_blur_radius = blur_radius
+            self.simple_border_glow_offset = offset
+
+            # 创建或更新发光效果
+            if self.simple_border_glow_effect is None:
+                self.simple_border_glow_effect = QGraphicsDropShadowEffect(self)
+
+            self.simple_border_glow_effect.setBlurRadius(blur_radius)
+            self.simple_border_glow_effect.setColor(QColor(*color))
+            self.simple_border_glow_effect.setOffset(offset, offset)
+            self.setGraphicsEffect(self.simple_border_glow_effect)
+        else:
+            # 禁用发光效果
+            if self.simple_border_glow_effect is not None:
+                self.setGraphicsEffect(None)
+                self.simple_border_glow_effect = None
 
     def setFixedStyleSheet(self, style_sheet: str):
         """设置样式表，自动识别 border-image 和 box-shadow"""
@@ -272,3 +328,152 @@ class IDLabel(QLabel):
             QRectF(bw/2, bw/2, w-bw, h-bw),
             r, r
         )
+
+    def setTextGlow(self, enable: bool = True, color: tuple = (255, 255, 255, 200),
+                    blur_radius: int = 15, spread: int = 3):
+        """
+        设置文本发光效果（仅对文字生效，不影响边框）
+        :param enable: 是否启用发光
+        :param color: 发光颜色 RGBA (255, 255, 255, 200)
+        :param blur_radius: 模糊半径，控制发光范围 (5-30)
+        :param spread: 发光扩散范围 (1-5)
+        """
+        self.enable_text_glow = enable
+
+        if enable:
+            self.text_glow_color = color
+            self.text_glow_blur_radius = max(5, min(30, blur_radius))
+            self.text_glow_spread = max(1, min(5, spread))
+            self.update()
+        else:
+            self.update()
+
+    def _draw_text_with_glow(self, painter: QPainter):
+        """绘制带发光效果的文本"""
+        text = self.text()
+        if not text:
+            return
+
+        # 获取文本矩形区域
+        metrics = QFontMetrics(self.font())
+        text_rect = metrics.boundingRect(self.rect(), int(self.alignment()), text)
+
+        # 保存原始画笔颜色
+        original_pen = painter.pen()
+
+        # 绘制发光层（多层半透明叠加）
+        glow_color = QColor(*self.text_glow_color)
+        spread = self.text_glow_spread
+        blur_steps = max(3, self.text_glow_blur_radius // 5)
+
+        for i in range(blur_steps, 0, -1):
+            alpha = glow_color.alpha() * (1 - i / (blur_steps + 1)) * 0.3
+            glow_color_with_alpha = QColor(glow_color.red(), glow_color.green(),
+                                           glow_color.blue(), int(alpha))
+            painter.setPen(glow_color_with_alpha)
+            painter.setFont(self.font())
+
+            # 在多个方向偏移绘制，模拟模糊效果
+            for dx in range(-spread, spread + 1):
+                for dy in range(-spread, spread + 1):
+                    offset_rect = text_rect.translated(dx, dy)
+                    painter.drawText(offset_rect, int(self.alignment()), text)
+
+        # 绘制正常文本
+        painter.setPen(original_pen)
+        painter.setFont(self.font())
+        painter.drawText(text_rect, int(self.alignment()), text)
+
+    def _draw_pixmap_with_glow(self, painter: QPainter):
+        """绘制带发光效果的图片/SVG"""
+        if self.pixmap() is None:
+            return
+        pixmap: QPixmap = self.pixmap()
+        if pixmap.isNull():
+            return
+
+        # 计算图片绘制区域
+        pixmap_rect = pixmap.rect()
+        pixmap_rect.moveCenter(self.rect().center())
+
+        # 绘制发光层（多层半透明叠加）
+        glow_color = QColor(*self.text_glow_color)
+        spread = self.text_glow_spread
+        blur_steps = max(3, self.text_glow_blur_radius // 5)
+
+        for i in range(blur_steps, 0, -1):
+            alpha = int(glow_color.alpha() * (1 - i / (blur_steps + 1)) * 0.3)
+
+            # 在多个方向偏移绘制，模拟模糊效果
+            for dx in range(-spread, spread + 1):
+                for dy in range(-spread, spread + 1):
+                    offset_rect = pixmap_rect.translated(dx, dy)
+                    painter.setOpacity(alpha / 255.0)
+                    painter.drawPixmap(offset_rect, pixmap)
+
+        # 恢复正常透明度并绘制原图
+        painter.setOpacity(1.0)
+        painter.drawPixmap(pixmap_rect, pixmap)
+
+    def _get_glow_padding(self):
+        """计算发光效果所需得额外边距"""
+        if not self.enable_text_glow:
+            return 0
+
+        # 发光需要的额外空间 = 模糊半径 + 扩散范围 * 2
+        # glow_radius = self.text_glow_blur_radius + self.text_glow_spread * 2
+        glow_radius = self.text_glow_spread * 2
+        return int(glow_radius)
+
+    def getRequiredSizeForTextGlow(self):
+        """
+        计算包含发光效果所需的完整尺寸（支持文字和SVG）
+        :return: QSize 对象，包含推荐的宽度和高度
+        """
+        # 如果有文本，按文本计算
+        if self.text():
+            metrics = QFontMetrics(self.font())
+            text_rect = metrics.boundingRect(QRect(0, 0, 10000, 10000),
+                                             int(self.alignment()), self.text())
+            glow_padding = self._get_glow_padding()
+            required_width = text_rect.width() + glow_padding * 2
+            required_height = text_rect.height() + glow_padding * 2
+            return QSize(required_width, required_height)
+
+        # 如果有图片/SVG，按图片计算
+        elif self.pixmap() and not self.pixmap().isNull():
+            pixmap_size = self.pixmap().size()
+            glow_padding = self._get_glow_padding()
+            required_width = pixmap_size.width() + glow_padding * 2
+            required_height = pixmap_size.height() + glow_padding * 2
+            return QSize(required_width, required_height)
+
+        # 默认返回当前尺寸
+        return self.size()
+
+    def resizeEvent(self, event):
+        """重写尺寸变化事件，确保发光效果完整显示"""
+        super().resizeEvent(event)
+
+        # 如果启用了文字发光，确保有足够的空间
+        if self.enable_text_glow and self.text():
+            glow_padding = self._get_glow_padding()
+
+            # 获取当前文字所需的实际空间
+            metrics = QFontMetrics(self.font())
+            text_rect = metrics.boundingRect(self.rect(), int(self.alignment()), self.text())
+
+            # 计算包含发光的完整区域
+            glow_rect = text_rect.adjusted(
+                -glow_padding, -glow_padding,
+                glow_padding, glow_padding
+            )
+
+            # 如果当前尺寸不足以显示完整发光，触发更新
+            if not self.rect().contains(glow_rect):
+                self.update()
+                
+    def adjustSize(self):
+        super().adjustSize()
+        if self.enable_text_glow and (self.text() or self.pixmap()):
+            self.setFixedSize(self.getRequiredSizeForTextGlow())

@@ -1,7 +1,7 @@
 from PyQt5.QtGui import QCursor
 
 from static.fonts import IceDriveFont
-from ..widgets import IDLabel
+from components.widgets import IDLabel
 
 from PyQt5.QtCore import Qt, QSize, QPoint, QTimer, QEvent
 from PyQt5.QtWidgets import QWidget, QVBoxLayout, QHBoxLayout, QLabel
@@ -40,7 +40,7 @@ class DeviceInfoTooltip(QWidget):
 
         # 文字标签
         self.label = QLabel(text)
-        self.label.setAlignment(Qt.AlignCenter) # 文字居中
+        self.label.setAlignment(Qt.AlignmentFlag.AlignCenter) # 文字居中
         self.label.setFont(IceDriveFont.vivoSansSimplifiedChinese.Bold(14))
         self.label.setStyleSheet("color: #ffffff;") # 白色文字
         layout.addWidget(self.label)

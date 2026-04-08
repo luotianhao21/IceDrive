@@ -1,12 +1,11 @@
 # app.py
-import time
 
 from static import icons
 from static.fonts import IceDriveFont
 from components import TopBar
 from components import SystemTray
 from components.pages import PageHome
-from libs import DeviceInfo, BLE, Commands, InfoData, Debug
+from libs import DeviceInfo, BLE, Commands
 
 from PyQt5.QtCore import QTimer, Qt, QEvent
 from PyQt5.QtGui import QIcon
@@ -26,7 +25,7 @@ class IceDriveApp(SiliconApplication):
         self.move((screen_geo.width() - self.width()) // 2, (screen_geo.height() - self.height()) // 2)
         self.is_minimized = False
 
-        #self.setWindowFlags(Qt.WindowType.FramelessWindowHint)
+        self.setWindowFlags(Qt.WindowType.FramelessWindowHint)
         self.setAttribute(Qt.WidgetAttribute.WA_TranslucentBackground)
 
         # 设置窗口标题和图标
@@ -35,7 +34,7 @@ class IceDriveApp(SiliconApplication):
 
         # 设置TopBar
         self.top_bar = TopBar(self)
-        # self.layerMain().page_view.page_navigator.container.addPlaceholder(8)
+        self.layerMain().page_view.page_navigator.container.addPlaceholder(8)
 
         # 初始化系统托盘
         self.system_tray = SystemTray(self)
@@ -50,59 +49,12 @@ class IceDriveApp(SiliconApplication):
 
         SiGlobal.siui.reloadAllWindowsStyleSheet()
 
-        self.setPage(0)
-
         # 初始化命令处理器
-        self.device_info_list_max_num = 50 # 信息存储最大数量
-        self.device_info_list_max_time = 60 # 信息存储最大时间: 秒
-        self.device_info_list: list[InfoData] = []
-
-        Debug(True)
         self.ble = BLE()
-        self.ble.signals.on_get_data.connect(self.set_fan_pump_data)
-        self.system_tray.tray_menu.rage_mode_btn.btn.clicked.connect(lambda _:self.ble.SendCommand(Commands.GetFanSpeed()))
         self.device_info = DeviceInfo()
-        self.device_info.updated.connect(self.updateDeviceInfo)
 
-    def set_fan_pump_data(self, _data: dict):
-        """
-        设置风扇和水泵的数据
-        :param _data: 数据
-        """
-        # 从最后一个开始遍历
-        for key, value in _data.items():
-            if key == "FanSpeed":
-                for item in reversed(self.device_info_list):
-                    print(value)
-                    if item.fan.speed:
-                        break
-                    else:
-                        item.fan.speed = value
-            if key == "PumpSpeed":
-                for item in reversed(self.device_info_list):
-                    if item.pump.speed:
-                        break
-                    else:
-                        item.pump.speed = value
-
-    def add_device_info(self, info_data: InfoData):
-        if len(self.device_info_list) >= self.device_info_list_max_num:
-            self.device_info_list.pop(0)
-
-        for item in self.device_info_list:
-            if time.time() - item.updated_time > self.device_info_list_max_time:
-                self.device_info_list.remove(item)
-            else:
-                break
-
-        self.device_info_list.append(info_data)
-
-    def updateDeviceInfo(self, info_data: InfoData):
-        """
-        更新设备信息（绑定更新消息）
-        :param info_data: 设备信息
-        """
-        self.add_device_info(info_data)
+        # 开启设备信息更新线程
+        self.device_info.start()
 
     def addPage(self, page, icon, hint: str, side="top"):
         """
@@ -120,12 +72,7 @@ class IceDriveApp(SiliconApplication):
         :param index: 页面的引索
         :return:
         """
-        # 获取当前页面索引
-        for btn in self.layerMain().page_view.page_navigator.buttons:
-            btn.setActive(False)
-
         self.layerMain().setPage(index)
-        self.layerMain().page_view.page_navigator.buttons[index].setActive(True)
 
     def showWindow(self):
         """用于调用显示主窗口"""
@@ -145,3 +92,7 @@ class IceDriveApp(SiliconApplication):
         self.show()
         self.raise_()
         self.activateWindow()
+
+    def mouseMoveEvent(self, event):
+        """鼠标移动时"""
+        super().mouseMoveEvent(event)

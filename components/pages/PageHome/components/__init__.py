@@ -1,1 +1,1 @@
-from .IDScrollarea import IDScrollArea
+from .CPUInfoCard import CPUInfoCard

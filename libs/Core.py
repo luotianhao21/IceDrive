@@ -23,16 +23,22 @@ class EventLoopThread(threading.Thread):
         self.loop = asyncio.new_event_loop()
         asyncio.set_event_loop(self.loop)
         self.ready.set()  # 通知主线程 loop 已准备好
+        if self.loop is None:
+            raise RuntimeError("loop is not ready")
         self.loop.run_forever()
 
     def create_task(self, coro):
         """线程安全地提交协程任务"""
         self.ready.wait()
+        if self.loop is None:
+            raise RuntimeError("loop is not ready")
         return asyncio.run_coroutine_threadsafe(coro, self.loop)
 
     def call_soon(self, callback, *args):
         """线程安全地调度普通函数"""
         self.ready.wait()
+        if self.loop is None:
+            raise RuntimeError("loop is not ready")
         self.loop.call_soon_threadsafe(callback, *args)
 
 
@@ -188,8 +194,64 @@ class MemoryInfo:
         return obj
 
 
+class InfoData:
+    class cpu:
+        usage = None
+        temperature = None
+        power = None
+
+    class gpu:
+        usage = None
+        temperature = None
+        hotspot_temperature = None
+        power = None
+
+    class memory:
+        usage = None
+        used = None
+        available = None
+        total = None
+
+    class gpu_memory:
+        usage = None
+        used = None
+        available = None
+        total = None
+
+    class fan:
+        speed = None
+
+    class pump:
+        speed = None
+
+    def __init__(self):
+        self.updated_time = time.time()
+
+    def __str__(self):
+        return f"="*20 + "\n" + \
+               f"更新时间: {time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(self.updated_time))}\n" + \
+               f"CPU使用率    {self.cpu.usage}%\n" \
+               f"CPU温度      {self.cpu.temperature}°C\n" \
+               f"CPU功耗      {self.cpu.power} W\n" \
+               f"GPU使用率    {self.gpu.usage}%\n" \
+               f"GPU温度      {self.gpu.temperature}°C\n" \
+               f"GPU热点温度  {self.gpu.hotspot_temperature}°C\n" \
+               f"GPU功耗      {self.gpu.power} W\n" \
+               f"GPU内存使用率 {self.gpu_memory.usage}%\n" \
+               f"GPU内存已用量 {self.gpu_memory.used} MB\n" \
+               f"GPU内存可用量 {self.gpu_memory.available} MB\n" \
+               f"GPU内存总量   {self.gpu_memory.total} MB\n" \
+               f"内存占用率    {self.memory.usage}%\n" \
+               f"内存已用量    {self.memory.used} MB\n" \
+               f"内存可用量    {self.memory.available} MB\n" \
+               f"内存总量      {self.memory.total} MB\n" \
+               f"风扇速度      {self.fan.speed}RPM\n" \
+               f"泵速         {self.pump.speed}RPM\n"
+
+
+
 class DeviceInfoData:
-    updated = Signal()
+    updated = Signal(InfoData)
     error = Signal(str)
 
     def __init__(self):
@@ -233,6 +295,11 @@ class DeviceInfoData:
                f"内存总量      {self.memory_total} MB"
 
     def extract_hardware_info(self, db):
+        """
+        解析注册表的数据
+        :param db: 注册表的数据
+        :return:
+        """
         if "SCPUUTI" in db:
             self.cpu_usage = db["SCPUUTI"]["value"]
         if "TCPUPKG" in db:
@@ -300,12 +367,30 @@ class DeviceInfoData:
         if current_time > self.last_update_time:
             self.extract_hardware_info(db)
             self.last_update_time = current_time
-            self.updated.emit()
+            self.updated.emit(self.getInfoData())
         return
 
+    def getInfoData(self) -> InfoData:
+        obj = InfoData()
+        obj.cpu.usage = self.cpu_usage
+        obj.cpu.temperature = self.cpu_temperature
+        obj.cpu.power = self.cpu_power
+        obj.gpu.usage = self.gpu_usage
+        obj.gpu.temperature = self.gpu_temperature
+        obj.gpu.hotspot_temperature = self.gpu_hotspot_temperature
+        obj.gpu.power = self.gpu_power
+        obj.gpu_memory.usage = self.gpu_memory_usage
+        obj.gpu_memory.used = self.gpu_memory_used
+        obj.gpu_memory.available = self.gpu_memory_available
+        obj.gpu_memory.total = self.gpu_memory_total
+        obj.memory.usage = self.memory_usage
+        obj.memory.used = self.memory_used
+        obj.memory.available = self.memory_available
+        obj.memory.total = self.memory_total
+        return obj
 
 class DeviceInfo:
-    updated = Signal()
+    updated = Signal(InfoData)
     error = Signal(str)
 
     def __init__(self):
@@ -491,8 +576,11 @@ class BLE:
             if target_device_address:
                 self.on_found_device(target_device_address)
 
-                self.device_client = BleakClient(address_or_ble_device=target_device_address,
+                self.device_client: BleakClient = BleakClient(address_or_ble_device=target_device_address,
                                                  disconnected_callback=self.on_disconnected)
+                if self.device_client is None:
+                    return False
+
                 await self.device_client.connect()
 
                 if self.device_client.is_connected:
@@ -536,7 +624,11 @@ class BLE:
                 # 添加结束符
                 command_bytes = command_str.encode('utf-8') + b'\n'
 
-                print(f"发送数据: {command_str}")
+                log("BLE", f"发送数据: {command_str}")
+
+                if self.device_client is None:
+                    raise RuntimeError("设备未连接")
+
                 await self.device_client.write_gatt_char(self.rx_uuid, command_bytes)
 
                 log("BLE", f"指令发送成功: {_command}")
@@ -551,9 +643,11 @@ class BLE:
     def deinit(self):
         # 清除资源
         # 断开蓝牙连接
-        self.device_client.disconnect()
+        if self.device_client is not None:
+            self.device_client.disconnect()
         # 停止事件循环线程
-        _loop_thread.loop.call_soon_threadsafe(_loop_thread.loop.stop)
+        if _loop_thread.loop is not None:
+            _loop_thread.loop.call_soon_threadsafe(_loop_thread.loop.stop)
         log("BLE", "已清理BLE资源")
 
 

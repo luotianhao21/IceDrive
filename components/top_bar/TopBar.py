@@ -45,9 +45,9 @@ class TopBar:
 
         self.layer_main.app_icon.load("static/images/Snow.png") # 加载图标
 
-        self.layer_main.container_title.addPlaceholder(10, side="left", index=0)
-        self.layer_main.container_title.addPlaceholder(8, side="left", index=2)
-        self.layer_main.app_icon.setFixedSize(38, 38)
+        self.layer_main.container_title.addPlaceholder(12, side="left", index=0)
+        self.layer_main.container_title.addPlaceholder(12, side="left", index=2)
+        self.layer_main.app_icon.setFixedSize(32, 32)
 
         # 创建三个按钮
         self.btn_min = SiSimpleButton(self.app)
