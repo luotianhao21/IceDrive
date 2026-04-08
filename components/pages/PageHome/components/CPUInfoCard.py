@@ -13,7 +13,7 @@ from static.fonts import IceDriveFont
 from static.icons import IceDriveCustomIconDictionary
 
 
-class CPUInfoCard(SiLabel):
+class CPUInfoCard(IDLabel):
     def __init__(self, page: Optional[PageHome], app: SiliconApplication, parent: SiDenseVContainer | SiDenseHContainer):
         super().__init__(parent)
         if page is None:
@@ -24,11 +24,21 @@ class CPUInfoCard(SiLabel):
         self._parent = parent
         self._border_radius = 8
 
+        self._width = 0
+        self._height = 0
+
         self.setStyleSheet(f"""
             background: #332E38;
             border-radius: {self._border_radius}px;
             border: 1px solid #433D4A;
         """)
+        self.enableGradientBorder(True)
+        self.setGradientBorderConfig(
+            width=1,
+            radius=self._border_radius,
+            color_start=(131, 122, 130, 70),
+            color_end=(131, 122, 130, 15)
+        )
 
         self._root_container = SiDenseVContainer(self)
         self._root_container.setSpacing(0)
@@ -83,9 +93,9 @@ class CPUInfoCard(SiLabel):
         self.title_icon.loadSvgData(SiGlobal.siui.iconpack.get("icedrive_ic_cpu", "#22C4DE"), QSize(28, 28))
         self.title_icon.setTextGlow(
             enable=True,
-            color=(168, 214, 225, 18),
-            blur_radius=20,
-            spread=2
+            color=(168, 214, 225, 9),
+            blur_radius=9,
+            spread=4
         )
         self.title_icon.adjustSize()
 
@@ -101,9 +111,9 @@ class CPUInfoCard(SiLabel):
         """)
         self.title_text.setTextGlow(
             enable=True,
-            color=(255, 255, 255, 20),
-            blur_radius=4,
-            spread=1
+            color=(255, 255, 255, 6),
+            blur_radius=15,
+            spread=3
         )
         self.title_text.adjustSize()
 

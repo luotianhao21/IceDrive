@@ -1,3 +1,5 @@
+import typing
+
 from PyQt5.QtSvg import QSvgRenderer
 from PyQt5.QtCore import QSize, Qt, QRectF, QRect
 from PyQt5.QtWidgets import QLabel, QWidget, QGraphicsDropShadowEffect
@@ -420,7 +422,7 @@ class IDLabel(QLabel):
         if not self.enable_text_glow:
             return 0
 
-        # 发光需要的额外空间 = 模糊半径 + 扩散范围 * 2
+        # 发光需要的额外空间 = 扩散范围 * 2
         # glow_radius = self.text_glow_blur_radius + self.text_glow_spread * 2
         glow_radius = self.text_glow_spread * 2
         return int(glow_radius)
