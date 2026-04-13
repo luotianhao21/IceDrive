@@ -1,8 +1,6 @@
 from typing import Optional
 
 from PyQt5.QtCore import Qt, QSize
-from PyQt5.QtGui import QColor
-from PyQt5.QtWidgets import QGraphicsDropShadowEffect
 from siui.components import SiLabel, SiDenseVContainer, SiDenseHContainer
 from siui.core import SiGlobal
 from siui.templates.application.application import SiliconApplication
@@ -11,11 +9,11 @@ from components.pages import PageHome
 from components.widgets import IDLabel
 from components.pages.PageHome.components.widgets.CircularProgressWidget import CircularProgressWidget
 from static.fonts import IceDriveFont
-from static.icons import IceDriveCustomIconDictionary
 
 
-class CPUInfoCard(IDLabel):
-    def __init__(self, page: Optional[PageHome], app: SiliconApplication, parent: SiDenseVContainer | SiDenseHContainer):
+class MemoryInfoCard(IDLabel):
+    def __init__(self, page: Optional[PageHome], app: SiliconApplication,
+                 parent: SiDenseVContainer | SiDenseHContainer):
         super().__init__(parent)
         if page is None:
             raise ValueError("PageHome instance is required")
@@ -91,7 +89,7 @@ class CPUInfoCard(IDLabel):
 
         self.title_icon = IDLabel(self._header_container)
         self.title_icon.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        self.title_icon.loadSvgData(SiGlobal.siui.iconpack.get("icedrive_ic_cpu", "#22C4DE"), QSize(28, 28))
+        self.title_icon.loadSvgData(SiGlobal.siui.iconpack.get("icedrive_ic_cpu", "#A855F7"), QSize(28, 28))
         self.title_icon.setTextGlow(
             enable=True,
             color=(0, 0, 0, 0),
@@ -100,7 +98,7 @@ class CPUInfoCard(IDLabel):
         )
         self.title_icon.setSimpleBorderGlow(
             enable=True,
-            color=(88, 107, 111, 180),
+            color=(168, 85, 247, 80),
             blur_radius=20,
             offset=0
         )
@@ -109,7 +107,7 @@ class CPUInfoCard(IDLabel):
         self.title_text = IDLabel(self._header_container)
         self.title_text.setAlignment(Qt.AlignmentFlag.AlignCenter)
         self.title_text.setFont(IceDriveFont.vivoSansSimplifiedChinese.ExtraBold(18))
-        self.title_text.setText("CPU 状态")
+        self.title_text.setText("Memory 资源")
         self.title_text.setStyleSheet("""
             IDLabel {
                 color: #FFFFFF;
@@ -126,27 +124,21 @@ class CPUInfoCard(IDLabel):
 
         self._header_container.addPlaceholder(int((self._header_height - self.title_icon.height()) / 2))
         self._header_container.addWidget(self.title_icon)
-        #self._header_container.addPlaceholder(6)
         self._header_container.addWidget(self.title_text)
 
-        #环形进度条
-        self.temp_ring = CircularProgressWidget(self._body_area, title="核心温度", unit="°C", color="#3B82F6")  # 蓝色
-        self.usage_ring = CircularProgressWidget(self._body_area, title="使用率", unit="%", color="#10B981")  # 绿色
-        self.power_ring = CircularProgressWidget(self._body_area, title="功率", unit="W", color="#F59E0B")  # 橙黄
+        # 环形进度条
+        self.ram_ring = CircularProgressWidget(self._body_area, title="内存使用率", unit="%", color="#A855F7")  # 紫色
+        self.vram_ring = CircularProgressWidget(self._body_area, title="显存使用率", unit="%", color="#EC4899")  # 粉色
 
-        # 均匀排列： 占位符 -> 温度 -> 占位符 -> 使用率 -> 占位符 -> 功率 -> 占位符
         self._body_container.addPlaceholder(20, "left")
-        self._body_container.addWidget(self.temp_ring)
+        self._body_container.addWidget(self.ram_ring)
         self._body_container.addPlaceholder(20)
-        self._body_container.addWidget(self.usage_ring)
-        self._body_container.addPlaceholder(20)
-        self._body_container.addWidget(self.power_ring)
+        self._body_container.addWidget(self.vram_ring)
         self._body_container.addPlaceholder(20, "right")
 
-        # 初始测试数据
-        self.temp_ring.setValue(45, max_val=100)
-        self.usage_ring.setValue(32, max_val=100)
-        self.power_ring.setValue(85, max_val=150)
+        # 初始数据
+        self.ram_ring.setValue(45, max_val=100)
+        self.vram_ring.setValue(82, max_val=100)
 
         self._root_container.addWidget(self._header_container)
         self._root_container.addWidget(self._body_container)
@@ -162,20 +154,20 @@ class CPUInfoCard(IDLabel):
         self._header_container.setFixedSize(self._header_area.size())
         self._body_container.setFixedSize(self._body_area.size())
 
-        # 计算圆环尺寸设定布局位置
+        # 自适应居中
         body_width = self._body_area.width()
         body_height = self._body_area.height()
-        gap = 20
-        max_ring_width = int((body_width - gap * 4) / 3)
+        gap = 40
+        max_ring_width = int((body_width - gap * 3) / 2)
         ring_size = min(max_ring_width, body_height - 20)
+
         if ring_size > 0:
-            content_width = ring_size * 3 + gap * 2
+            content_width = ring_size * 2 + gap
             x_start = max(int((body_width - content_width) / 2), gap)
             y_start = max(int((body_height - ring_size) / 2), 10)
 
-            self.temp_ring.setGeometry(x_start, y_start, ring_size, ring_size)
-            self.usage_ring.setGeometry(x_start + ring_size + gap, y_start, ring_size, ring_size)
-            self.power_ring.setGeometry(x_start + (ring_size + gap) * 2, y_start, ring_size, ring_size)
+            self.ram_ring.setGeometry(x_start, y_start, ring_size, ring_size)
+            self.vram_ring.setGeometry(x_start + ring_size + gap, y_start, ring_size, ring_size)
 
         self.title_icon.adjustSize()
         self.title_text.adjustSize()
