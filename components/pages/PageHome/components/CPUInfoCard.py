@@ -8,7 +8,7 @@ from siui.core import SiGlobal
 from siui.templates.application.application import SiliconApplication
 
 from components.pages import PageHome
-from components.widgets import IDLabel
+from components.widgets import IDLabel, IDCircularProgressBar
 from static.fonts import IceDriveFont
 from static.icons import IceDriveCustomIconDictionary
 
@@ -85,7 +85,7 @@ class CPUInfoCard(IDLabel):
         self._body_container = SiDenseHContainer(self._body_area)
         self._body_container.setSpacing(0)
         self._body_container.setContentsMargins(0, 0, 0, 0)
-        self._body_container.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        #self._body_container.setAlignment(Qt.AlignmentFlag.AlignHCenter)
         self._body_container.setFixedSize(self._body_area.size())
 
         self.title_icon = IDLabel(self._header_container)
@@ -128,6 +128,14 @@ class CPUInfoCard(IDLabel):
         #self._header_container.addPlaceholder(6)
         self._header_container.addWidget(self.title_text)
 
+        self.test = IDCircularProgressBar(self._body_container)
+        self.test.setBarWidth(5, int((self._body_container.width() - 30 * 3) / 6))
+        self.test.setValue(71 * 0.01)
+        #self.test.setIndeterminate(True)
+        self.test.setInnerText("71")
+        self.test.setUnit("度")
+        self._body_container.addWidget(self.test)
+
         self._root_container.addWidget(self._header_container)
         self._root_container.addWidget(self._body_container)
 
@@ -141,5 +149,6 @@ class CPUInfoCard(IDLabel):
         )
         self._header_container.setFixedSize(self._header_area.size())
         self._body_container.setFixedSize(self._body_area.size())
+        self.test.setBarWidth(5, int((self._body_container.width() - 10 * 3) / 6))
         self.title_icon.adjustSize()
         self.title_text.adjustSize()
