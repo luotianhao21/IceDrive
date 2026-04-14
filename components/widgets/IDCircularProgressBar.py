@@ -355,6 +355,7 @@ class IDCircularProgressBar(SiLabel):
             painter.setFont(self._inner_text_font)
             painter.drawText(process_bar_rect, Qt.AlignmentFlag.AlignCenter, self._inner_text)
 
+        # 单位
         if self._unit_text:
             painter.setPen(self._unit_text_color)
             painter.setFont(self._unit_text_font)
@@ -365,6 +366,7 @@ class IDCircularProgressBar(SiLabel):
             )
             painter.drawText(unit_rect, Qt.AlignmentFlag.AlignCenter, self._unit_text)
 
+        # 标题
         if self._title_text:
             painter.setPen(self._title_text_color)
             painter.setFont(self._title_text_font)
@@ -374,3 +376,5 @@ class IDCircularProgressBar(SiLabel):
                 process_bar_rect.width(), self._get_title_size().height()
             )
             painter.drawText(title_rect, Qt.AlignmentFlag.AlignCenter, self._title_text)
+
+        painter.end()

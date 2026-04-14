@@ -131,7 +131,7 @@ class CPUInfoCard(IDLabel):
         self.test = IDCircularProgressBar(self._body_container)
         self.test.setBarWidth(10, 15)
         self.test.setValue(71 * 0.01)
-        #self.test.setIndeterminate(True)
+        self.test.setIndeterminate(True)
         self.test.setInnerText("71")
         self.test.setUnitFromBottom(20)
         self.test.setUnit("度")
