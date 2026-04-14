@@ -15,7 +15,7 @@ class IDCircularProgressBar(SiLabel):
         super().__init__(*args, **kwargs)
 
         self.setStyleSheet("""
-            background: blue;
+            background: transparent;
             border: none;
         """)
         self.setAlignment(Qt.AlignmentFlag.AlignCenter)
@@ -35,8 +35,8 @@ class IDCircularProgressBar(SiLabel):
         self._unit_text_font: QFont = IceDriveFont.vivoSansSimplifiedChinese.Bold(10)
         self._unit_text_from_bottom: int = 8 # 单位到圆环的距离
         self._title_text: str = '' # 标题
-        self._title_text_font: QFont = IceDriveFont.vivoSansSimplifiedChinese.Bold(11)
-        self._title_spacing: int = 10 # 圆环到标题之间的距离
+        self._title_text_font: QFont = IceDriveFont.vivoSansSimplifiedChinese.ExtraBold(12)
+        self._title_spacing: int = 20 # 圆环到标题之间的距离
 
         # 是否在加载
         self._indeterminate: bool = False
@@ -100,7 +100,7 @@ class IDCircularProgressBar(SiLabel):
         title_size = self._get_title_size() if self._title_text else QSize(0, 0)
         self.setFixedSize(
             QSize(
-                max(self._outer_radius * 2, title_size.width()) + self._margins[0] - self._margins[2] + self._bar_width,
+                max(self._outer_radius * 2, title_size.width()) + self._margins[0] - self._margins[2] + self._bar_width * 2,
                 self._outer_radius * 2 + self._title_spacing + title_size.height() + self._margins[1] - self._margins[3]
             )
         )
@@ -322,7 +322,7 @@ class IDCircularProgressBar(SiLabel):
         rect = self.rect()
         rect.adjust(*self._margins)
         process_bar_rect = QRectF(
-            int((rect.width() - self._outer_radius * 2 + self._bar_width) / 2),
+            int((rect.width() - self._outer_radius * 2) / 2 + self._bar_width + self._margins[3]),
             self._bar_width / 2 + self._margins[1],
             self._outer_radius * 2 - int(self._bar_width / 2),
             self._outer_radius * 2 - int(self._bar_width / 2)
@@ -365,4 +365,12 @@ class IDCircularProgressBar(SiLabel):
             )
             painter.drawText(unit_rect, Qt.AlignmentFlag.AlignCenter, self._unit_text)
 
-        #if self._title_text:
+        if self._title_text:
+            painter.setPen(self._title_text_color)
+            painter.setFont(self._title_text_font)
+            title_rect = QRectF(
+                process_bar_rect.x(),
+                process_bar_rect.y() + process_bar_rect.height() + self._title_spacing,
+                process_bar_rect.width(), self._get_title_size().height()
+            )
+            painter.drawText(title_rect, Qt.AlignmentFlag.AlignCenter, self._title_text)

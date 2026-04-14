@@ -129,11 +129,13 @@ class CPUInfoCard(IDLabel):
         self._header_container.addWidget(self.title_text)
 
         self.test = IDCircularProgressBar(self._body_container)
-        self.test.setBarWidth(5, int((self._body_container.width() - 30 * 3) / 6))
+        self.test.setBarWidth(10, 15)
         self.test.setValue(71 * 0.01)
         #self.test.setIndeterminate(True)
         self.test.setInnerText("71")
+        self.test.setUnitFromBottom(20)
         self.test.setUnit("度")
+        self.test.setTitle("CPU 温度")
         self._body_container.addWidget(self.test)
 
         self._root_container.addWidget(self._header_container)
@@ -149,6 +151,6 @@ class CPUInfoCard(IDLabel):
         )
         self._header_container.setFixedSize(self._header_area.size())
         self._body_container.setFixedSize(self._body_area.size())
-        self.test.setBarWidth(5, int((self._body_container.width() - 10 * 3) / 6))
+        self.test.setBarWidth(10, 60)
         self.title_icon.adjustSize()
         self.title_text.adjustSize()
